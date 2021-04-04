@@ -1,5 +1,7 @@
 package ge.tsu.spring.lecture3.car;
 
+import java.util.Objects;
+
 public class CarView {
 
   private String id;
@@ -48,4 +50,13 @@ public class CarView {
   public void setSpeed(float speed) {
     this.speed = speed;
   }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+    CarView carView = (CarView) o;
+    return Float.compare(carView.speed, speed) == 0 && id.equals(carView.id) && manufacturer.equals(carView.manufacturer) && model.equals(carView.model);
+  }
+
 }

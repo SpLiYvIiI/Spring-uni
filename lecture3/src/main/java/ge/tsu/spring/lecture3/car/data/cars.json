@@ -1,11 +1,6 @@
 [ {
-  "id" : "518343a4-fa5b-4ab4-a743-098ae3965dcf",
-  "manufacturer" : "vincaxa",
-  "model" : "racxadcax",
-  "speed" : 1000.0
-}, {
   "id" : "44feb1e3-76ec-4f66-a191-194f7c1288b1",
-  "manufacturer" : "vinacaxa",
+  "manufacturer" : "saas",
   "model" : "racxadcax",
-  "speed" : 1000.0
+  "speed" : 103.0
 } ]

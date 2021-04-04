@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 @Service("carFileImpl")
 public class CarServiceFileImpl implements CarService {
 
-  private static final String JSON_DATA = "lecture3/src/main/java/ge/tsu/spring/lecture3/car/data/cars.json";
+  private static final String JSON_DATA = "src/main/java/ge/tsu/spring/lecture3/car/data/cars.json";
   private static final ObjectMapper objectMapper = new ObjectMapper();
 
   @Override
@@ -23,39 +23,45 @@ public class CarServiceFileImpl implements CarService {
     List<CarView> carList = objectMapper.readValue(
             new File(JSON_DATA),
             new TypeReference<List<CarView>>(){});
-    Optional<CarView> exists = carList
-            .stream()
-            .filter(it -> addCar.getManufacturer().equals(it.getManufacturer()) && it.getModel().equals(addCar.getModel()))
-            .findFirst();
-    if (exists.isPresent()) {
-      throw new RecordAlreadyExistsException(
-              String.format("Car with %s and %s already exists", addCar.getManufacturer(), addCar.getModel()));
+    for(CarView car : carList){
+      if(car.getManufacturer().equals(addCar.getManufacturer()) && car.getModel().equals(addCar.getModel())){
+        throw new RecordAlreadyExistsException(
+                String.format("Car with %s and %s already exists", addCar.getManufacturer(), addCar.getModel()));
+      }
     }
-    carList.add(new CarView(
+    CarView toAdd = new CarView(
             UUID.randomUUID().toString(),
             addCar.getManufacturer(),
             addCar.getModel(),
             addCar.getSpeed()
-    ));
+    );
+    carList.add(toAdd);
     objectMapper.writerWithDefaultPrettyPrinter().writeValue(new File(JSON_DATA),carList);
   }
 
   @Override
-  public void update(String id, AddCar addCar) throws  RecordNotFoundException, IOException {
+  public void update(String id, AddCar modifyCar) throws  RecordNotFoundException, IOException {
     List<CarView> carList = objectMapper.readValue(
             new File(JSON_DATA),
             new TypeReference<List<CarView>>() {
             });
-    for (CarView carView : carList) {
-      if (carView.getId().equals(id)) {
-        carView.setManufacturer(addCar.getManufacturer());
-        carView.setModel(addCar.getModel());
-        carView.setSpeed(addCar.getSpeed());
-        objectMapper.writerWithDefaultPrettyPrinter().writeValue(new File(JSON_DATA),carList);
-        return;
+    Boolean foundRecord = false;
+    CarView carToModify = new CarView();
+    for(CarView car : carList){
+      System.out.println(car.getId() + "   " + id);
+      if(car.getId().equals(id)) {
+        foundRecord = true;
+        carToModify = car;
+        break;
       }
     }
-    throw new RecordNotFoundException("Unable to find car with specified id");
+    if(!foundRecord) {
+      throw new RecordNotFoundException("Unable to find car with specified id");
+    }
+    carToModify.setModel(modifyCar.getModel());
+    carToModify.setSpeed(modifyCar.getSpeed());
+    carToModify.setManufacturer(modifyCar.getManufacturer());
+    objectMapper.writerWithDefaultPrettyPrinter().writeValue(new File(JSON_DATA),carList);
   }
 
   @Override
@@ -64,12 +70,22 @@ public class CarServiceFileImpl implements CarService {
               new File(JSON_DATA),
               new TypeReference<List<CarView>>() {
               });
-
-    if (manufacturer != null && model != null) {
-      return carList
-              .stream()
-              .filter(it -> it.getManufacturer().contains(manufacturer) && it.getModel().contains(model))
-              .collect(Collectors.toList());
+    Iterator<CarView> carListIterator;
+    if(manufacturer != null) {
+      carListIterator = carList.iterator();
+      while (carListIterator.hasNext()) {
+        if (!(carListIterator.next().getManufacturer().contains(manufacturer))) {
+          carListIterator.remove();
+        }
+      }
+    }
+    if(model != null) {
+      carListIterator = carList.iterator();
+      while (carListIterator.hasNext()) {
+        if (!(carListIterator.next().getModel().contains(model))) {
+          carListIterator.remove();
+        }
+      }
     }
     return carList;
   }
@@ -92,15 +108,13 @@ public class CarServiceFileImpl implements CarService {
     List<CarView> carList = objectMapper.readValue(
             new File(JSON_DATA),
             new TypeReference<List<CarView>>() {});
-    Iterator<CarView> carViewIterator = carList.iterator();
-    while (carViewIterator.hasNext()) {
-      CarView carView = carViewIterator.next();
-      if (carView.getId().equals(id)) {
-        carViewIterator.remove();
+    for(Iterator<CarView> it = carList.iterator(); it.hasNext();)
+      if (it.next().getId().equals(id)) {
+        it.remove();
         objectMapper.writerWithDefaultPrettyPrinter().writeValue(new File(JSON_DATA),carList);
         return;
       }
-    }
+
     throw new RecordNotFoundException("Unable to find car with specified id");
   }
 }
