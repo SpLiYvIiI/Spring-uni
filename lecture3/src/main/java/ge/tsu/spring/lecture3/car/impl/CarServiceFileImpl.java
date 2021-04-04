@@ -70,22 +70,15 @@ public class CarServiceFileImpl implements CarService {
               new File(JSON_DATA),
               new TypeReference<List<CarView>>() {
               });
-    Iterator<CarView> carListIterator;
     if(manufacturer != null) {
-      carListIterator = carList.iterator();
-      while (carListIterator.hasNext()) {
-        if (!(carListIterator.next().getManufacturer().contains(manufacturer))) {
-          carListIterator.remove();
-        }
-      }
+      for(Iterator<CarView> it = carList.iterator(); it.hasNext();)
+        if (!(it.next().getManufacturer().contains(manufacturer)))
+          it.remove();
     }
     if(model != null) {
-      carListIterator = carList.iterator();
-      while (carListIterator.hasNext()) {
-        if (!(carListIterator.next().getModel().contains(model))) {
-          carListIterator.remove();
-        }
-      }
+      for(Iterator<CarView> it = carList.iterator(); it.hasNext();)
+        if (!(it.next().getModel().contains(model)))
+          it.remove();
     }
     return carList;
   }
